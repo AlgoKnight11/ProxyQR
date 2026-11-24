@@ -4,15 +4,62 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Dashboard | ProxyQR</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <!-- html5-qrcode scanner library -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-</head>
-<body class="bg-mesh min-h-screen text-slate-100 flex flex-col justify-between">
+  
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    
+    html, body {
+      background-color: #07090e !important;
+      color: #f1f5f9 !important;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+    }
 
-  <!-- Top Navigation Bar -->
+    .bg-mesh-dark {
+      background-color: #07090e;
+      background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.18), transparent 70%),
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.10) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 45%);
+      background-attachment: fixed;
+    }
+
+    .glass-card {
+      background: rgba(13, 18, 30, 0.78);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    }
+
+    .glass-card-hover {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: rgba(99, 102, 241, 0.35);
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.2);
+    }
+
+    .glow-scan-btn {
+      box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.5);
+    }
+    .glow-scan-btn:hover {
+      box-shadow: 0 15px 40px -5px rgba(99, 102, 241, 0.7);
+    }
+  </style>
+</head>
+<body class="bg-mesh-dark min-h-screen text-slate-100 flex flex-col justify-between">
+
+  <!-- Nav -->
   <nav class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-30">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -34,7 +81,7 @@
         </div>
         <button 
           onclick="Auth.logout()" 
-          class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-rose-400 border border-slate-700/50 transition-colors text-sm"
+          class="p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 transition-colors text-sm"
           title="Sign Out"
         >
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -43,16 +90,16 @@
     </div>
   </nav>
 
-  <!-- Main Content Container -->
+  <!-- Main Content -->
   <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1">
     
-    <!-- Welcome Greeting & Quick Scanner Launch Hero -->
-    <div class="glass-panel rounded-2xl p-6 sm:p-8 mb-8 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+    <!-- Welcome Greeting & Hero Scan Action -->
+    <div class="glass-card rounded-3xl p-6 sm:p-8 mb-8 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
       <div class="space-y-2 text-center md:text-left z-10">
-        <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-1">
+        <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-1">
           <i class="fa-solid fa-graduation-cap mr-1.5"></i> Computer Science & Engineering
         </div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
           Hello, <span id="heroStudentName" class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Student</span> 👋
         </h1>
         <p class="text-slate-400 text-sm max-w-lg">
@@ -64,7 +111,7 @@
       <div class="z-10 w-full md:w-auto">
         <button 
           id="openScannerBtn"
-          class="w-full md:w-auto px-7 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-base shadow-xl shadow-indigo-600/40 glow-indigo flex items-center justify-center gap-3 transition-all transform active:scale-95"
+          class="w-full md:w-auto px-7 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-base glow-scan-btn flex items-center justify-center gap-3 transition-all transform active:scale-95"
         >
           <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
             <i class="fa-solid fa-camera text-sm"></i>
@@ -73,7 +120,6 @@
         </button>
       </div>
 
-      <!-- Background Glow Circle -->
       <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
@@ -81,25 +127,25 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
       
       <!-- Overall Percentage -->
-      <div class="glass-panel rounded-2xl p-5 relative overflow-hidden">
+      <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Overall Attendance</span>
-          <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-sm">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-sm border border-indigo-500/20">
             <i class="fa-solid fa-chart-pie"></i>
           </div>
         </div>
         <div class="mt-4 flex items-baseline gap-2">
           <span id="kpiOverallPct" class="text-3xl font-black text-white">--%</span>
-          <span id="kpiStatusBadge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Evaluating</span>
+          <span id="kpiStatusBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-slate-800">Evaluating</span>
         </div>
-        <p class="text-[11px] text-slate-400 mt-2">Minimum 75% required by university regulations</p>
+        <p class="text-[11px] text-slate-400 mt-2 font-medium">Minimum 75% required by university regulations</p>
       </div>
 
       <!-- Classes Attended -->
-      <div class="glass-panel rounded-2xl p-5 relative overflow-hidden">
+      <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Lectures Attended</span>
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/20">
             <i class="fa-solid fa-check-double"></i>
           </div>
         </div>
@@ -111,10 +157,10 @@
       </div>
 
       <!-- Enrolled Courses -->
-      <div class="glass-panel rounded-2xl p-5 relative overflow-hidden">
+      <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Enrolled Courses</span>
-          <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-sm">
+          <div class="w-8 h-8 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center text-sm border border-violet-500/20">
             <i class="fa-solid fa-book-open"></i>
           </div>
         </div>
@@ -126,7 +172,7 @@
       </div>
     </div>
 
-    <!-- Defaulter Warning Banner (Conditional) -->
+    <!-- Defaulter Warning Banner -->
     <div id="defaulterWarning" class="hidden mb-8 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-start gap-3">
       <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0 mt-0.5">
         <i class="fa-solid fa-triangle-exclamation"></i>
@@ -134,32 +180,31 @@
       <div>
         <h4 class="font-bold text-sm text-white">Attendance Shortfall Alert (< 75%)</h4>
         <p class="text-xs text-rose-300/80 mt-0.5">
-          Your attendance in one or more subjects is currently below the mandatory 75% threshold. Please attend upcoming lectures to maintain eligibility for semester examinations.
+          Your attendance in one or more subjects is currently below the mandatory 75% threshold. Please attend upcoming lectures to maintain examination eligibility.
         </p>
       </div>
     </div>
 
-    <!-- Enrolled Courses Section -->
+    <!-- Enrolled Courses -->
     <div class="mb-10">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-bold text-white flex items-center gap-2">
           <i class="fa-solid fa-layer-group text-indigo-400 text-sm"></i>
           Subject-Wise Attendance Breakdown
         </h2>
-        <span class="text-xs text-slate-400">Updated in real-time</span>
+        <span class="text-xs text-slate-400">Real-time sync</span>
       </div>
 
-      <div id="coursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Rendered dynamically -->
-        <div class="glass-panel rounded-2xl p-6 text-center text-slate-500">
+      <div id="coursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="glass-card rounded-2xl p-6 text-center text-slate-500">
           <i class="fa-solid fa-circle-notch fa-spin text-xl"></i>
           <p class="text-xs mt-2">Loading courses...</p>
         </div>
       </div>
     </div>
 
-    <!-- Recent Attendance Logs -->
-    <div class="glass-panel rounded-2xl p-6">
+    <!-- Recent Logs -->
+    <div class="glass-card rounded-2xl p-6">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-base font-bold text-white flex items-center gap-2">
           <i class="fa-solid fa-clock-rotate-left text-indigo-400 text-sm"></i>
@@ -191,30 +236,25 @@
 
   <!-- ================= QR SCANNER MODAL ================= -->
   <div id="scannerModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="glass-panel w-full max-w-md rounded-3xl p-6 relative border border-slate-700 shadow-2xl flex flex-col items-center">
+    <div class="glass-card w-full max-w-md rounded-3xl p-6 relative border border-slate-700 shadow-2xl flex flex-col items-center">
       
-      <!-- Close Button -->
-      <button id="closeScannerBtn" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+      <button id="closeScannerBtn" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
       <div class="text-center mb-4">
-        <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 mb-2">
+        <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 mb-2 border border-indigo-500/30">
           <i class="fa-solid fa-expand text-lg"></i>
         </div>
         <h3 class="text-lg font-bold text-white">Scan Classroom QR Code</h3>
-        <p class="text-xs text-slate-400">Position the camera steadily towards the projector screen</p>
+        <p class="text-xs text-slate-400">Position the camera towards the classroom screen</p>
       </div>
 
-      <!-- Scanner Viewfinder Box -->
-      <div class="relative w-full aspect-square max-w-[290px] rounded-2xl overflow-hidden bg-slate-900 border-2 border-indigo-500/50 shadow-inner flex items-center justify-center">
-        <!-- Interactive Scanner Box -->
+      <div class="relative w-full aspect-square max-w-[280px] rounded-2xl overflow-hidden bg-slate-950 border-2 border-indigo-500/50 shadow-inner flex items-center justify-center">
         <div id="reader" class="w-full h-full"></div>
-        <!-- Laser Scanning Line -->
         <div class="scanner-laser"></div>
       </div>
 
-      <!-- Scanner Status / Error Text -->
       <div id="scannerStatusText" class="mt-4 text-xs text-center text-slate-400 flex items-center justify-center gap-1.5 min-h-[24px]">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-1"></span>
         <span>Looking for dynamic QR token...</span>
@@ -230,14 +270,14 @@
 
   <!-- ================= SUCCESS CONFIRMATION MODAL ================= -->
   <div id="successModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="glass-panel w-full max-w-sm rounded-3xl p-6 text-center border border-emerald-500/30 shadow-2xl relative">
-      <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center text-2xl mb-4 glow-emerald">
+    <div class="glass-card w-full max-w-sm rounded-3xl p-6 text-center border border-emerald-500/30 shadow-2xl relative">
+      <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center text-2xl mb-4 border border-emerald-500/30">
         <i class="fa-solid fa-circle-check"></i>
       </div>
       <h3 class="text-xl font-black text-white">Attendance Verified!</h3>
       <p class="text-xs text-slate-400 mt-1" id="successCourseName">Operating Systems</p>
 
-      <div class="my-5 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-left space-y-2 text-xs">
+      <div class="my-5 p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-left space-y-2 text-xs">
         <div class="flex justify-between">
           <span class="text-slate-500 font-medium">Student:</span>
           <span class="text-white font-semibold" id="successStudentName">Rajpreet Singh</span>
@@ -259,43 +299,40 @@
   </div>
 
   <!-- Footer -->
-  <footer class="w-full max-w-6xl mx-auto px-4 py-6 text-center text-xs text-slate-400 border-t border-slate-900">
-    <p>ProxyQR Attendance Management System &bull; Academic Project</p>
+  <footer class="w-full max-w-6xl mx-auto px-4 py-6 text-center text-xs text-slate-500 border-t border-slate-900">
+    <p>ProxyQR Dynamic Attendance System &bull; Academic Project</p>
   </footer>
 
+  <script src="../js/config.js"></script>
   <script src="/js/config.js"></script>
+  <script src="../js/auth.js"></script>
   <script src="/js/auth.js"></script>
   <script>
     let currentUser = null;
     let html5QrCode = null;
     let isProcessingScan = false;
-    let currentFacingMode = "environment"; // Back camera by default for mobile
+    let currentFacingMode = "environment";
 
-    // Beep sound feedback
     function playBeep() {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = "sine";
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime); // 880 Hz
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
         gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.2);
-      } catch (e) {
-        // AudioContext not allowed or not supported
-      }
+      } catch (e) {}
     }
 
-    // Initialize Dashboard
     async function initDashboard() {
       currentUser = await Auth.checkAuth("student");
       if (!currentUser) return;
 
-      // Populate user info in nav
       document.getElementById("navStudentName").innerText = currentUser.full_name;
       document.getElementById("navRollNo").innerText = `Roll: ${currentUser.roll_no || 'N/A'}`;
       document.getElementById("heroStudentName").innerText = currentUser.full_name.split(" ")[0];
@@ -304,7 +341,6 @@
       await loadHistory();
     }
 
-    // Load Enrolled Courses
     async function loadCourses() {
       try {
         const res = await Auth.fetchWithAuth("/api/courses/student");
@@ -331,7 +367,7 @@
           const progressBg = isSafe ? "bg-emerald-500" : "bg-rose-500";
 
           return `
-            <div class="glass-panel glass-panel-hover rounded-2xl p-5 flex flex-col justify-between">
+            <div class="glass-card glass-card-hover rounded-2xl p-5 flex flex-col justify-between">
               <div>
                 <div class="flex items-center justify-between mb-3">
                   <span class="px-2.5 py-1 rounded-md text-[11px] font-bold font-mono bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
@@ -353,8 +389,7 @@
                   <span class="text-xs text-slate-400">Attendance:</span>
                   <span class="text-sm font-extrabold ${strokeColor}">${course.percentage}%</span>
                 </div>
-                <!-- Progress bar -->
-                <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div class="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
                   <div class="h-full rounded-full ${progressBg} transition-all duration-500" style="width: ${course.percentage}%"></div>
                 </div>
                 <div class="flex justify-between items-center text-[11px] text-slate-500 mt-2 font-mono">
@@ -366,7 +401,6 @@
           `;
         }).join("");
 
-        // Update KPIs
         const overallPct = totalConducted > 0 ? (totalAttended / totalConducted * 100).toFixed(1) : "100.0";
         document.getElementById("kpiOverallPct").innerText = `${overallPct}%`;
         document.getElementById("kpiAttendedCount").innerText = totalAttended;
@@ -375,14 +409,13 @@
 
         const badge = document.getElementById("kpiStatusBadge");
         if (parseFloat(overallPct) >= 75.0) {
-          badge.className = "text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+          badge.className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
           badge.innerText = "Compliant (≥ 75%)";
         } else {
-          badge.className = "text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20";
+          badge.className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20";
           badge.innerText = "Defaulter (< 75%)";
         }
 
-        // Show/hide defaulter warning banner
         if (hasLowAttendance) {
           document.getElementById("defaulterWarning").classList.remove("hidden");
         } else {
@@ -394,7 +427,6 @@
       }
     }
 
-    // Load History
     async function loadHistory() {
       try {
         const res = await Auth.fetchWithAuth("/api/attendance/student/history");
@@ -415,7 +447,7 @@
             : '<span class="inline-flex items-center px-2 py-0.5 rounded-md font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20"><i class="fa-solid fa-xmark mr-1 text-[10px]"></i> Absent</span>';
 
           return `
-            <tr class="hover:bg-slate-800/30 transition-colors">
+            <tr class="hover:bg-slate-900/40 transition-colors">
               <td class="py-3 px-3">
                 <div class="font-semibold text-white">${item.course_code}</div>
                 <div class="text-[11px] text-slate-400 truncate max-w-xs">${item.course_name}</div>
@@ -437,7 +469,7 @@
       }
     }
 
-    // ================= QR SCANNER LOGIC =================
+    // ================= QR SCANNER =================
     const scannerModal = document.getElementById("scannerModal");
     const openScannerBtn = document.getElementById("openScannerBtn");
     const closeScannerBtn = document.getElementById("closeScannerBtn");
@@ -478,9 +510,7 @@
         try {
           await html5QrCode.stop();
           html5QrCode.clear();
-        } catch (e) {
-          console.warn("Scanner stop issue:", e);
-        }
+        } catch (e) {}
       }
       scannerModal.classList.add("hidden");
     }
@@ -504,10 +534,8 @@
           throw new Error(data.detail || "Verification failed");
         }
 
-        // Successfully marked!
         await stopScanner();
 
-        // Show Success Confirmation Modal
         document.getElementById("successCourseName").innerText = `${data.course_code} - ${data.course_name}`;
         document.getElementById("successStudentName").innerText = data.student_name;
         document.getElementById("successRollNo").innerText = data.roll_no;
@@ -515,13 +543,11 @@
 
         successModal.classList.remove("hidden");
 
-        // Refresh attendance stats
         await loadCourses();
         await loadHistory();
 
       } catch (err) {
         scannerStatusText.innerHTML = `<span class="text-rose-400 font-semibold"><i class="fa-solid fa-circle-xmark mr-1"></i> ${err.message}</span>`;
-        // Allow retry after 2.5s
         setTimeout(() => {
           isProcessingScan = false;
           scannerStatusText.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-1"></span> Ready to scan again';
@@ -529,9 +555,7 @@
       }
     }
 
-    function onScanFailure(error) {
-      // Periodic frame scanning without barcode - ignore to prevent console flood
-    }
+    function onScanFailure(error) {}
 
     openScannerBtn.addEventListener("click", startScanner);
     closeScannerBtn.addEventListener("click", stopScanner);
@@ -546,7 +570,6 @@
       successModal.classList.add("hidden");
     });
 
-    // Start on page load
     initDashboard();
   </script>
 </body>
