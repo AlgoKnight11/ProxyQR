@@ -1,0 +1,91 @@
+/* Modern Custom Styles & Animations for ProxyQR */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #090d16;
+  color: #f1f5f9;
+  min-height: 100vh;
+}
+
+/* Background Ambient Glow */
+.bg-mesh {
+  background: 
+    radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 60%);
+}
+
+/* Glassmorphism Card Panels */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 35px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.glass-panel-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.15), 0 0 0 1px rgba(99, 102, 241, 0.2) inset;
+}
+
+/* Dynamic Scanner Laser Animation */
+@keyframes scan-laser {
+  0% { top: 5%; opacity: 0.8; }
+  50% { top: 90%; opacity: 1; }
+  100% { top: 5%; opacity: 0.8; }
+}
+
+.scanner-laser {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #6366f1, #38bdf8, transparent);
+  box-shadow: 0 0 15px #6366f1, 0 0 5px #38bdf8;
+  animation: scan-laser 2.2s infinite ease-in-out;
+  border-radius: 9999px;
+  z-index: 20;
+}
+
+/* Countdown Circular Progress */
+.countdown-svg circle {
+  transition: stroke-dashoffset 0.9s linear;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Glow Badge */
+.glow-emerald {
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+}
+.glow-rose {
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.3);
+}
+.glow-indigo {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+}

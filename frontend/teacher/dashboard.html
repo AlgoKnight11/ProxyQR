@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faculty Dashboard | ProxyQR</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-mesh min-h-screen text-slate-100 flex flex-col justify-between">
+
+  <!-- Top Nav Bar -->
+  <nav class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+          <i class="fa-solid fa-qrcode text-base"></i>
+        </div>
+        <div>
+          <span class="font-bold tracking-tight text-white flex items-center gap-1">
+            Proxy<span class="text-indigo-400">QR</span>
+          </span>
+          <span class="text-[10px] uppercase font-semibold tracking-wider text-indigo-400">Faculty Portal</span>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <div class="hidden sm:flex flex-col text-right">
+          <span id="navTeacherName" class="text-sm font-semibold text-white">Faculty Name</span>
+          <span id="navTeacherEmail" class="text-xs text-slate-400 font-mono">faculty@college.edu</span>
+        </div>
+        <button 
+          onclick="Auth.logout()" 
+          class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-rose-400 border border-slate-700/50 transition-colors text-sm"
+          title="Sign Out"
+        >
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1">
+    
+    <!-- Faculty Hero Banner -->
+    <div class="glass-panel rounded-2xl p-6 sm:p-8 mb-8 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="space-y-1.5 text-center sm:text-left z-10">
+        <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-1">
+          <i class="fa-solid fa-chalkboard-user mr-1.5"></i> Department of Computer Science & Engineering
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          Welcome, <span id="heroTeacherName" class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Professor</span>
+        </h1>
+        <p class="text-slate-400 text-sm max-w-lg">
+          Select a course below to start a dynamic, time-bound attendance session or export attendance reports.
+        </p>
+      </div>
+
+      <!-- Quick Action Stats -->
+      <div class="flex gap-3 z-10 w-full sm:w-auto">
+        <div class="glass-panel rounded-xl px-4 py-3 text-center flex-1 sm:flex-initial">
+          <div class="text-2xl font-black text-white" id="statCourseCount">0</div>
+          <div class="text-[11px] text-slate-400 uppercase font-semibold">Courses</div>
+        </div>
+        <div class="glass-panel rounded-xl px-4 py-3 text-center flex-1 sm:flex-initial">
+          <div class="text-2xl font-black text-indigo-400" id="statStudentCount">0</div>
+          <div class="text-[11px] text-slate-400 uppercase font-semibold">Total Students</div>
+        </div>
+      </div>
+
+      <!-- Ambient Glow -->
+      <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    </div>
+
+    <!-- Active Session Alert Box (If session running) -->
+    <div id="activeSessionBox" class="hidden glass-panel rounded-2xl p-6 mb-8 border-indigo-500/40 relative overflow-hidden glow-indigo">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl flex-shrink-0 animate-pulse">
+            <i class="fa-solid fa-satellite-dish"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Lecture In Progress</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mt-0.5" id="activeCourseTitle">CS301 - Operating Systems</h3>
+            <p class="text-xs text-slate-400">
+              Students present so far: <span id="activePresentCount" class="text-white font-bold text-sm">0</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 w-full md:w-auto">
+          <button id="openProjectorBtn" class="flex-1 md:flex-initial px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all">
+            <i class="fa-solid fa-display"></i> Projector Screen
+          </button>
+          <button id="openManualOverrideBtn" class="flex-1 md:flex-initial px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs rounded-xl border border-slate-700 flex items-center justify-center gap-2 transition-all">
+            <i class="fa-solid fa-user-pen"></i> Manual Entry
+          </button>
+          <button id="endSessionBtn" class="px-4 py-2.5 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white font-semibold text-xs rounded-xl border border-rose-500/30 transition-all flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-stop"></i> End Lecture
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assigned Courses Grid -->
+    <div class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-book-bookmark text-indigo-400 text-sm"></i>
+          Assigned Courses & Lecture Controls
+        </h2>
+        <span class="text-xs text-slate-400">Click to start attendance or view roster</span>
+      </div>
+
+      <div id="teacherCoursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="glass-panel rounded-2xl p-6 text-center text-slate-500 col-span-full">
+          <i class="fa-solid fa-circle-notch fa-spin text-xl"></i>
+          <p class="text-xs mt-2">Loading courses...</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= COURSE ROSTER MODAL ================= -->
+  <div id="rosterModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 relative border border-slate-700 shadow-2xl flex flex-col max-h-[90vh]">
+      
+      <!-- Close Button -->
+      <button id="closeRosterBtn" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="mb-4 pr-10">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-indigo-500/20 text-indigo-400" id="rosterCourseCode">CS301</span>
+          <span class="text-xs text-slate-400" id="rosterTotalLectures">3 total lectures conducted</span>
+        </div>
+        <h3 class="text-xl font-bold text-white" id="rosterCourseName">Operating Systems</h3>
+      </div>
+
+      <!-- Actions Bar -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="text-xs text-slate-400">
+          Enrolled: <span id="rosterStudentCount" class="text-white font-semibold">0</span> students
+        </div>
+        <a id="exportCsvBtn" href="#" class="px-3.5 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-semibold flex items-center gap-2 transition-all">
+          <i class="fa-solid fa-file-csv"></i> Download CSV Report
+        </a>
+      </div>
+
+      <!-- Students Table -->
+      <div class="overflow-y-auto my-3 flex-1">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider sticky top-0 bg-slate-900">
+              <th class="py-2.5 px-3">Roll Number</th>
+              <th class="py-2.5 px-3">Student Name</th>
+              <th class="py-2.5 px-3 text-center">Attended</th>
+              <th class="py-2.5 px-3 text-right">Percentage</th>
+              <th class="py-2.5 px-3 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody id="rosterTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MANUAL ATTENDANCE OVERRIDE MODAL ================= -->
+  <div id="manualModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-md rounded-3xl p-6 relative border border-slate-700 shadow-2xl">
+      <button id="closeManualBtn" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-user-pen"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Manual Override</h3>
+          <p class="text-xs text-slate-400">For phone battery or hardware scanning issues</p>
+        </div>
+      </div>
+
+      <form id="manualForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+            Select Enrolled Student
+          </label>
+          <select id="manualStudentSelect" class="w-full py-2.5 px-3 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500">
+            <option value="">Loading enrolled students...</option>
+          </select>
+        </div>
+
+        <div id="manualFeedback" class="hidden p-3 rounded-xl text-xs flex items-center gap-2"></div>
+
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-check"></i> Record Manual Attendance
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="w-full max-w-6xl mx-auto px-4 py-6 text-center text-xs text-slate-400 border-t border-slate-900">
+    <p>ProxyQR Attendance Management System &bull; Academic Project</p>
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let currentUser = null;
+    let activeSession = null;
+    let allCourses = [];
+
+    // Modals
+    const rosterModal = document.getElementById("rosterModal");
+    const closeRosterBtn = document.getElementById("closeRosterBtn");
+    const manualModal = document.getElementById("manualModal");
+    const closeManualBtn = document.getElementById("closeManualBtn");
+    const manualStudentSelect = document.getElementById("manualStudentSelect");
+    const manualForm = document.getElementById("manualForm");
+    const manualFeedback = document.getElementById("manualFeedback");
+
+    async function initTeacherDashboard() {
+      currentUser = await Auth.checkAuth("teacher");
+      if (!currentUser) return;
+
+      document.getElementById("navTeacherName").innerText = currentUser.full_name;
+      document.getElementById("navTeacherEmail").innerText = currentUser.email || "";
+      document.getElementById("heroTeacherName").innerText = currentUser.full_name.split(" ")[1] || currentUser.full_name;
+
+      await loadTeacherCourses();
+    }
+
+    async function loadTeacherCourses() {
+      try {
+        const res = await Auth.fetchWithAuth("/api/courses/teacher");
+        allCourses = await res.json();
+
+        document.getElementById("statCourseCount").innerText = allCourses.length;
+        let totalStudents = 0;
+        let runningSessionCourse = null;
+
+        const grid = document.getElementById("teacherCoursesGrid");
+        if (allCourses.length === 0) {
+          grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-6">No courses assigned to your account.</div>';
+          return;
+        }
+
+        grid.innerHTML = allCourses.map(course => {
+          totalStudents += course.enrolled_count;
+          if (course.has_active_session) {
+            runningSessionCourse = course;
+          }
+
+          return `
+            <div class="glass-panel glass-panel-hover rounded-2xl p-5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="px-2.5 py-1 rounded-md text-[11px] font-bold font-mono bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                    ${course.course_code}
+                  </span>
+                  <span class="text-xs text-slate-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-users text-slate-500"></i>
+                    ${course.enrolled_count} Students
+                  </span>
+                </div>
+                <h3 class="text-base font-bold text-white line-clamp-1">${course.course_name}</h3>
+                <p class="text-xs text-slate-400 mt-1">Classroom Lecture</p>
+              </div>
+
+              <div class="mt-6 pt-4 border-t border-slate-800/80 flex items-center gap-2">
+                ${
+                  course.has_active_session
+                  ? `
+                    <button onclick="openProjector(${course.active_session_id})" class="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow-md shadow-emerald-600/30 flex items-center justify-center gap-1.5 transition-all">
+                      <i class="fa-solid fa-satellite-dish animate-pulse"></i> Open Session
+                    </button>
+                  `
+                  : `
+                    <button onclick="startSession(${course.id})" class="flex-1 py-2.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow-md shadow-indigo-600/30 flex items-center justify-center gap-1.5 transition-all">
+                      <i class="fa-solid fa-play"></i> Start Lecture
+                    </button>
+                  `
+                }
+                <button onclick="openRoster(${course.id})" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl border border-slate-700 transition-colors" title="View Enrolled Roster & Defaulters">
+                  <i class="fa-solid fa-chart-simple"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        document.getElementById("statStudentCount").innerText = totalStudents;
+
+        // Active Session Bar Handling
+        const activeBox = document.getElementById("activeSessionBox");
+        if (runningSessionCourse) {
+          activeSession = runningSessionCourse;
+          activeBox.classList.remove("hidden");
+          document.getElementById("activeCourseTitle").innerText = `${runningSessionCourse.course_code} - ${runningSessionCourse.course_name}`;
+          
+          document.getElementById("openProjectorBtn").onclick = () => openProjector(runningSessionCourse.active_session_id);
+          document.getElementById("openManualOverrideBtn").onclick = () => openManualOverride(runningSessionCourse.id, runningSessionCourse.active_session_id);
+          document.getElementById("endSessionBtn").onclick = () => endSession(runningSessionCourse.active_session_id);
+
+          // Fetch attendance count
+          loadActiveSessionCount(runningSessionCourse.active_session_id);
+        } else {
+          activeSession = null;
+          activeBox.classList.add("hidden");
+        }
+
+      } catch (err) {
+        console.error("Failed to load courses:", err);
+      }
+    }
+
+    async function loadActiveSessionCount(sessionId) {
+      try {
+        const res = await Auth.fetchWithAuth(`/api/sessions/${sessionId}/attendances`);
+        const data = await res.json();
+        document.getElementById("activePresentCount").innerText = `${data.total_present} marked present`;
+      } catch (e) {}
+    }
+
+    // Start a new session
+    async function startSession(courseId) {
+      try {
+        const res = await Auth.fetchWithAuth("/api/sessions/start", {
+          method: "POST",
+          body: JSON.stringify({ course_id: courseId })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Could not start session");
+
+        // Open Projector Screen directly in new tab or popup
+        openProjector(data.session_id);
+        await loadTeacherCourses();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function openProjector(sessionId) {
+      window.open(`/teacher/projector.html?session_id=${sessionId}`, "_blank");
+    }
+
+    // End active session
+    async function endSession(sessionId) {
+      if (!confirm("Are you sure you want to end this lecture session? The dynamic QR code will expire permanently.")) return;
+      try {
+        const res = await Auth.fetchWithAuth(`/api/sessions/${sessionId}/end`, {
+          method: "POST"
+        });
+        const data = await res.json();
+        alert(`Session ended. Final attendance: ${data.total_present} students.`);
+        await loadTeacherCourses();
+      } catch (err) {
+        alert("Error ending session");
+      }
+    }
+
+    // View Roster & Defaulters
+    async function openRoster(courseId) {
+      rosterModal.classList.remove("hidden");
+      const tbody = document.getElementById("rosterTableBody");
+      tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-500">Loading student records...</td></tr>';
+
+      try {
+        const res = await Auth.fetchWithAuth(`/api/courses/${courseId}/students`);
+        const data = await res.json();
+
+        document.getElementById("rosterCourseCode").innerText = data.course.course_code;
+        document.getElementById("rosterCourseName").innerText = data.course.course_name;
+        document.getElementById("rosterTotalLectures").innerText = `${data.course.total_classes} total lectures conducted`;
+        document.getElementById("rosterStudentCount").innerText = data.students.length;
+        document.getElementById("exportCsvBtn").href = getApiUrl(`/api/attendance/export/${courseId}`);
+
+        if (data.students.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-500">No students enrolled.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.students.map(s => {
+          const isSafe = !s.is_low;
+          const statusBadge = isSafe 
+            ? '<span class="inline-flex items-center px-2 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Good</span>'
+            : '<span class="inline-flex items-center px-2 py-0.5 rounded font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">Defaulter (<75%)</span>';
+
+          return `
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-2.5 px-3 font-mono text-slate-300">${s.roll_no || 'N/A'}</td>
+              <td class="py-2.5 px-3 font-semibold text-white">${s.full_name}</td>
+              <td class="py-2.5 px-3 text-center text-slate-400">${s.attended} / ${s.total}</td>
+              <td class="py-2.5 px-3 text-right font-bold ${isSafe ? 'text-emerald-400' : 'text-rose-400'}">${s.percentage}%</td>
+              <td class="py-2.5 px-3 text-center">${statusBadge}</td>
+            </tr>
+          `;
+        }).join("");
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-rose-400">Error loading roster: ${err.message}</td></tr>`;
+      }
+    }
+
+    closeRosterBtn.addEventListener("click", () => rosterModal.classList.add("hidden"));
+
+    // Manual Override Modal
+    let currentManualSessionId = null;
+    async function openManualOverride(courseId, sessionId) {
+      currentManualSessionId = sessionId;
+      manualModal.classList.remove("hidden");
+      manualFeedback.classList.add("hidden");
+      manualStudentSelect.innerHTML = '<option value="">Loading students...</option>';
+
+      try {
+        const res = await Auth.fetchWithAuth(`/api/courses/${courseId}/students`);
+        const data = await res.json();
+        manualStudentSelect.innerHTML = '<option value="">-- Choose student --</option>' + 
+          data.students.map(s => `<option value="${s.student_id}">${s.roll_no} - ${s.full_name}</option>`).join("");
+      } catch (e) {
+        manualStudentSelect.innerHTML = '<option value="">Failed to load students</option>';
+      }
+    }
+
+    closeManualBtn.addEventListener("click", () => manualModal.classList.add("hidden"));
+
+    manualForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const studentId = manualStudentSelect.value;
+      if (!studentId || !currentManualSessionId) return;
+
+      try {
+        const res = await Auth.fetchWithAuth("/api/attendance/manual", {
+          method: "POST",
+          body: JSON.stringify({
+            session_id: currentManualSessionId,
+            student_id: parseInt(studentId),
+            status: "manual_override"
+          })
+        });
+        const data = await res.json();
+
+        manualFeedback.className = "p-3 rounded-xl text-xs flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+        manualFeedback.innerHTML = `<i class="fa-solid fa-check"></i> ${data.message}`;
+        manualFeedback.classList.remove("hidden");
+
+        await loadActiveSessionCount(currentManualSessionId);
+      } catch (err) {
+        manualFeedback.className = "p-3 rounded-xl text-xs flex items-center gap-2 bg-rose-500/10 text-rose-400 border border-rose-500/20";
+        manualFeedback.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${err.message}`;
+        manualFeedback.classList.remove("hidden");
+      }
+    });
+
+    // Initialize
+    initTeacherDashboard();
+  </script>
+</body>
+</html>
