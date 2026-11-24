@@ -256,16 +256,36 @@
       submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...';
 
       try {
-        const res = await fetch(getApiUrl("/api/auth/login"), {
+        // Detect if deployed without configured backend URL
+        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        if (!isLocal && !CONFIG.API_BASE) {
+          throw new Error("Backend URL not configured! Please open 'frontend/js/config.js' and set your live Render backend URL in CONFIG.API_BASE.");
+        }
+
+        const apiUrl = getApiUrl("/api/auth/login");
+        const res = await fetch(apiUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ identifier, password })
         });
 
-        const data = await res.json();
+        // Safely parse JSON or text
+        const text = await res.text();
+        let data = {};
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch {
+          if (res.status === 404) {
+            throw new Error(`API endpoint not found (404). Check that your backend is running at ${CONFIG.API_BASE || window.location.origin}`);
+          } else if (res.status >= 500) {
+            throw new Error(`Backend server error (${res.status}). The server may be starting up, please wait a moment and try again.`);
+          } else {
+            throw new Error(`Server returned unexpected response (${res.status}).`);
+          }
+        }
 
         if (!res.ok) {
-          throw new Error(data.detail || "Authentication failed");
+          throw new Error(data.detail || `Authentication failed (${res.status})`);
         }
 
         Auth.setSession(data.access_token, data.user);

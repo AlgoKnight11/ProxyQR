@@ -19,7 +19,8 @@ app = FastAPI(
 # Configure CORS - allows Netlify deployments and mobile network clients
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Allow Netlify and all origins
+    allow_origins=["*"],
+    allow_origin_regex="https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -35,16 +35,16 @@ const Auth = {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const res = await fetch(getApiUrl(url), {
+    const apiUrl = getApiUrl(url);
+    const res = await fetch(apiUrl, {
       ...options,
       headers
     });
 
     if (res.status === 401) {
-      // Session expired or invalid
       this.clearSession();
-      window.location.href = "/login.html";
-      throw new Error("Unauthorized session");
+      window.location.href = "../login.html";
+      throw new Error("Session expired or unauthorized. Please sign in again.");
     }
 
     return res;
